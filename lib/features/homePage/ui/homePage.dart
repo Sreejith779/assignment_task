@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../model/saveList.dart';
-
 import '../bloc/home_bloc.dart';
 
 class HomePage extends StatefulWidget {
@@ -16,11 +15,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   HomeBloc homeBloc = HomeBloc();
 
-
   @override
   void initState() {
     homeBloc.add(HomeInitialEvent());
-
     super.initState();
   }
 
@@ -29,29 +26,34 @@ class _HomePageState extends State<HomePage> {
     return BlocConsumer<HomeBloc, HomeState>(
       bloc: homeBloc,
       listener: (context, state) {
-        switch(state.runtimeType){
-          case HomeSaveActionState:
-            final loadedState  = state as HomeSaveActionState;
-              showDialog(context: context, builder: (contextIndex){
-                return AlertDialog(
-                  title: Text("Saved!"),
-                  actions: [
-                    Column(
-                     children: state.saved.map((e){
-                       return ListTile(
-                         title: Text(e['label']??"No label"),
-                         subtitle:  Column(
-                           children: [
-                             Text(e['info']),
-
-                           ],
-                         )
-                       );
-                     }).toList(),
-                    )
-                  ],
-                );
-              });
+        if (state is HomeSaveActionState) {
+          showDialog(
+            context: context,
+            builder: (contextIndex) {
+              return AlertDialog(
+                title: Text("Saved!"),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: state.saved.map((item) {
+                    return ListTile(
+                      title: Text(item['label'] ?? 'No Label'),
+                      subtitle: Text(item['info'] ?? 'No Info'),
+                      trailing: Text(
+                          (item['settings'] as List).join(", ") ?? 'No Settings'),
+                    );
+                  }).toList(),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("OK"),
+                  ),
+                ],
+              );
+            },
+          );
         }
       },
       builder: (context, state) {
@@ -68,9 +70,9 @@ class _HomePageState extends State<HomePage> {
               margin: EdgeInsets.all(20),
               child: Column(
                 children: [
-                  ...forms.map((e) => formWidget(e, forms.indexOf(e))).toList(),
+                  ...forms.map((e) => formWidget(e,  forms.indexOf(e))).toList(),
                   ElevatedButton(
-                    onPressed: (){
+                    onPressed: () {
                       homeBloc.add(HomeAddEvent());
                     },
                     child: Text("Add"),
@@ -84,12 +86,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget formWidget(FormModel form,int index) {
+  Widget formWidget(FormModel form, int index) {
     return Container(
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(15),
-      color: Colors.grey.withOpacity(0.2),
-    ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        color: Colors.grey.withOpacity(0.2),
+      ),
       margin: EdgeInsets.all(16.0),
       child: Padding(
         padding: EdgeInsets.all(16.0),
@@ -98,10 +100,14 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Align(
-                alignment: Alignment.topRight,
-                child: ElevatedButton(onPressed: (){
-                  homeBloc.add(HomeDeleteEvent(index:index));
-                }, child: const Text("Remove"))),
+              alignment: Alignment.topRight,
+              child: ElevatedButton(
+                onPressed: () {
+                  homeBloc.add(HomeDeleteEvent(index: index));
+                },
+                child: const Text("Remove"),
+              ),
+            ),
             const Text(
               "Label*",
               style: TextStyle(
@@ -169,7 +175,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
   void saveAllForms() {
     for (var form in  forms) {
       final label = form.labelController.text;
@@ -181,14 +186,11 @@ class _HomePageState extends State<HomePage> {
       homeBloc.add(HomeSaveEvent(
         label: label.isEmpty ? 'No Label' : label,
         info: info.isEmpty ? 'No Info' : info,
-        settings: settings,
+        settings: settings.isEmpty ? ['No Settings'] : settings,
       ));
       form.labelController.clear();
       form.infoController.clear();
     }
     print("All forms have been saved");
   }
-
 }
-
-

@@ -24,11 +24,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   FutureOr<void> homeSaveEvent(HomeSaveEvent event, Emitter<HomeState> emit) {
-    final label = event.label ?? '';
+    final _label = event.label ?? '';
     final info = event.info ?? '';
     final settings = event.settings ?? [];
     savedList.add({
-      "label'": label,
+      "label'": _label,
       "info": info,
       "settings": settings
     });
