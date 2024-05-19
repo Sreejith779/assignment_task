@@ -13,3 +13,8 @@ class HomeSaveEvent extends HomeEvent{
 }
 
 class HomeAddEvent extends HomeEvent{}
+
+class HomeDeleteEvent extends HomeEvent{
+  final int index;
+  HomeDeleteEvent({required this.index});
+}
